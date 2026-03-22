@@ -1,0 +1,9 @@
+{
+  "name": "qa-plugin",
+  "version": "0.1.0",
+  "description": "Claude Code plugin for comprehensive AI QA testing setup",
+  "private": true,
+  "engines": {
+    "node": ">=16"
+  }
+}

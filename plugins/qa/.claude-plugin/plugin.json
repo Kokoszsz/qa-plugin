@@ -1,0 +1,8 @@
+{
+  "name": "qa",
+  "description": "Skills, commands, and hooks for analyzing projects and generating comprehensive QA testing infrastructure. Scaffolds test-writing skills, coverage analysis, use-case identification, and test review into any project's .claude/ directory.",
+  "version": "0.1.0",
+  "author": {
+    "name": "your-github-username"
+  }
+}
