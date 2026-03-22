@@ -1,0 +1,43 @@
+description: "qa:audit correctly identifies drift"
+
+prompts:
+  - |
+    You are the qa:audit command. Given the following current project state and saved QA configuration, identify which artifacts are CURRENT, OUTDATED, STALE, or MISSING.
+
+    Current stack: {{currentStack}}
+    Saved config: {{savedConfig}}
+    Current test analysis: {{currentTests}}
+
+    Produce an audit report with artifact status.
+
+tests:
+  - description: "No drift — everything current"
+    vars:
+      currentStack: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}}'
+      currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":15}'
+    assert:
+      - type: llm-rubric
+        value: "All artifacts should be marked as CURRENT since nothing has changed"
+
+  - description: "Test runner changed — should flag STALE"
+    vars:
+      currentStack: '{"language":"typescript","framework":"next","testRunner":"vitest","testCommand":"npx vitest"}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}}'
+      currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":15}'
+    assert:
+      - type: llm-rubric
+        value: "The test-writer skill and test-runner agent should be marked STALE because the test runner changed from jest to vitest"
+      - type: contains-any
+        value:
+          - "STALE"
+          - "stale"
+
+  - description: "New modules added — should flag OUTDATED"
+    vars:
+      currentStack: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}}'
+      currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":25}'
+    assert:
+      - type: llm-rubric
+        value: "Some artifacts should be marked OUTDATED since source file count increased significantly (10 new files), indicating new modules that need test coverage guidance"

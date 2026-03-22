@@ -1,0 +1,14 @@
+description: "QA Plugin Behavioral Tests"
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-20250514
+    config:
+      temperature: 0
+
+defaultTest:
+  options:
+    provider:
+      id: anthropic:messages:claude-sonnet-4-20250514
+    timeout: 60000
+
+tests: "skills/*.test.yaml"

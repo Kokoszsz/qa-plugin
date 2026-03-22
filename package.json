@@ -5,5 +5,13 @@
   "private": true,
   "engines": {
     "node": ">=16"
+  },
+  "scripts": {
+    "test": "node tests/scripts/detect-stack.test.js && node tests/scripts/analyze-tests.test.js && node tests/scripts/verify-setup.test.js",
+    "test:promptfoo": "cd tests && promptfoo eval --env-file ../.env",
+    "test:promptfoo:view": "cd tests && promptfoo view"
+  },
+  "devDependencies": {
+    "promptfoo": "^0.100.0"
   }
 }

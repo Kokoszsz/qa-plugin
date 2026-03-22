@@ -1,0 +1,51 @@
+description: "qa:init scaffolds correctly for different project types"
+
+prompts:
+  - |
+    You are the qa:init command. Given the following project detection results, describe what QA artifacts you would generate.
+
+    Stack detection: {{stackJson}}
+    Test analysis: {{testAnalysisJson}}
+
+    List the exact files you would create in .claude/ and briefly describe what each would contain.
+
+tests:
+  - description: "TypeScript + Next.js + Jest (no existing tests)"
+    vars:
+      stackJson: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test","coverageTool":"istanbul","ci":"github-actions","packageManager":"npm"}'
+      testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":12,"patterns":[]}'
+    assert:
+      - type: contains
+        value: "qa-test-writer"
+      - type: contains
+        value: "qa-config.json"
+      - type: llm-rubric
+        value: "The response mentions Jest as the test runner and references Next.js or React Testing Library patterns"
+      - type: llm-rubric
+        value: "The response creates skills, agents, and commands — not just one type of artifact"
+
+  - description: "Python + Django + pytest (existing tests)"
+    vars:
+      stackJson: '{"language":"python","framework":"django","testRunner":"pytest","testCommand":"pytest","coverageTool":"coverage.py","ci":null,"packageManager":"pip"}'
+      testAnalysisJson: '{"hasTests":true,"testFileCount":8,"sourceFileCount":20,"patterns":["test_.*\\.py"],"conventions":{"testLocation":"separate","namingPatterns":["test_*"]}}'
+    assert:
+      - type: llm-rubric
+        value: "The response acknowledges existing pytest tests and builds on them rather than replacing them"
+      - type: llm-rubric
+        value: "The response references Django-specific testing patterns (TestCase, Client, etc.)"
+
+  - description: "Go project (no existing tests)"
+    vars:
+      stackJson: '{"language":"go","framework":null,"testRunner":"go test","testCommand":"go test ./...","coverageTool":"go cover","ci":null,"packageManager":null}'
+      testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":5,"patterns":[]}'
+    assert:
+      - type: llm-rubric
+        value: "The response references Go testing conventions (_test.go files, testing.T, table-driven tests)"
+
+  - description: "Empty/unknown project"
+    vars:
+      stackJson: '{"language":null,"framework":null,"testRunner":null,"testCommand":null,"coverageTool":null,"ci":null,"packageManager":null}'
+      testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":0,"patterns":[]}'
+    assert:
+      - type: llm-rubric
+        value: "The response asks for more information or suggests a common stack rather than generating incorrect artifacts"

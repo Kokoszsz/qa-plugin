@@ -1,0 +1,39 @@
+description: "qa-coordinator suggests correct next actions"
+
+prompts:
+  - |
+    You are the qa-coordinator skill. Given the command that just ran and its results, suggest the single most helpful next action.
+
+    Command: {{command}}
+    Results: {{results}}
+
+    Output exactly one "Suggested next step" line.
+
+tests:
+  - description: "After init with no tests — suggest writing tests"
+    vars:
+      command: "/qa:init"
+      results: '{"hasTests":false,"artifactsGenerated":11,"stack":"typescript/next/jest"}'
+    assert:
+      - type: llm-rubric
+        value: "Should suggest using the test-writer skill to create first tests, or running /qa:analyze"
+
+  - description: "After audit with stale artifacts — suggest sync"
+    vars:
+      command: "/qa:audit"
+      results: '{"current":3,"outdated":1,"stale":2,"missing":0}'
+    assert:
+      - type: llm-rubric
+        value: "Should suggest running /qa:sync to regenerate the stale artifacts"
+      - type: contains-any
+        value:
+          - "/qa:sync"
+          - "sync"
+
+  - description: "After analyze with gaps — suggest test-writer"
+    vars:
+      command: "/qa:analyze"
+      results: '{"coverageGaps":5,"qualityIssues":2,"untestedFlows":3,"highestPriority":"src/services/"}'
+    assert:
+      - type: llm-rubric
+        value: "Should suggest using the test-writer skill to add tests for the highest priority module (src/services/)"
