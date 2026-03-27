@@ -1,13 +1,41 @@
 description: "qa:init scaffolds correctly for different project types"
 
+providers:
+  - id: anthropic:messages:claude-sonnet-4-20250514
+    config:
+      temperature: 0
+
 prompts:
   - |
-    You are the qa:init command. Given the following project detection results, describe what QA artifacts you would generate.
+    You are the qa:init command for a Claude Code QA plugin. Given project detection results, describe what QA artifacts you would generate.
+
+    You MUST generate these exact artifacts into the project's .claude/ directory:
+
+    Skills:
+    - .claude/skills/qa-test-writer/SKILL.md — How to write tests for this project
+    - .claude/skills/qa-use-case-identifier/SKILL.md — How to identify testable user flows
+    - .claude/skills/qa-coverage-analyzer/SKILL.md — How to analyze test coverage
+    - .claude/skills/qa-test-reviewer/SKILL.md — How to review test quality
+
+    Agents:
+    - .claude/agents/qa-test-runner/AGENT.md — Runs the project's test suite
+    - .claude/agents/qa-coverage-checker/AGENT.md — Runs coverage analysis
+    - .claude/agents/qa-test-reviewer/AGENT.md — Reviews test quality
+
+    Commands:
+    - .claude/commands/test/COMMAND.md — Smart test runner
+    - .claude/commands/test-coverage/COMMAND.md — Coverage analysis
+    - .claude/commands/test-review/COMMAND.md — Test quality review
+
+    Config:
+    - .claude/qa-config.json — Stack detection results and preferences
+
+    Each artifact must be customized to the detected stack. If tests already exist, build on their conventions.
 
     Stack detection: {{stackJson}}
     Test analysis: {{testAnalysisJson}}
 
-    List the exact files you would create in .claude/ and briefly describe what each would contain.
+    List the exact files you would create and briefly describe how each is customized for this specific project.
 
 tests:
   - description: "TypeScript + Next.js + Jest (no existing tests)"
@@ -32,7 +60,7 @@ tests:
       - type: llm-rubric
         value: "The response acknowledges existing pytest tests and builds on them rather than replacing them"
       - type: llm-rubric
-        value: "The response references Django-specific testing patterns (TestCase, Client, etc.)"
+        value: "The response references Django-specific testing patterns (TestCase, Client, or Django test utilities)"
 
   - description: "Go project (no existing tests)"
     vars:
@@ -40,7 +68,7 @@ tests:
       testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":5,"patterns":[]}'
     assert:
       - type: llm-rubric
-        value: "The response references Go testing conventions (_test.go files, testing.T, table-driven tests)"
+        value: "The response references Go testing conventions (_test.go files, testing.T, or table-driven tests)"
 
   - description: "Empty/unknown project"
     vars:
@@ -48,4 +76,52 @@ tests:
       testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":0,"patterns":[]}'
     assert:
       - type: llm-rubric
-        value: "The response asks for more information or suggests a common stack rather than generating incorrect artifacts"
+        value: "The response notes the unknown stack and either asks for clarification, provides generic defaults, or explains it cannot fully customize without stack information"
+
+  - description: "Rust + Cargo (no existing tests)"
+    vars:
+      stackJson: '{"language":"rust","framework":null,"testRunner":"cargo test","testCommand":"cargo test","coverageTool":"tarpaulin","ci":"github-actions","packageManager":"cargo"}'
+      testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":8,"patterns":[]}'
+    assert:
+      - type: llm-rubric
+        value: "The response references Rust testing conventions (#[test], #[cfg(test)], mod tests, or cargo test)"
+      - type: contains
+        value: "qa-test-writer"
+
+  - description: "Java + Spring Boot + JUnit5 (existing tests)"
+    vars:
+      stackJson: '{"language":"java","framework":"spring-boot","testRunner":"junit5","testCommand":"mvn test","coverageTool":"jacoco","ci":"github-actions","packageManager":"maven"}'
+      testAnalysisJson: '{"hasTests":true,"testFileCount":12,"sourceFileCount":30,"patterns":[".*Test\\.java"],"conventions":{"testLocation":"separate","namingPatterns":["*Test.java"]}}'
+    assert:
+      - type: llm-rubric
+        value: "The response references JUnit 5 conventions (@Test, Assertions, or @SpringBootTest) and acknowledges the existing test patterns"
+      - type: llm-rubric
+        value: "The response references Spring Boot testing (MockMvc, @WebMvcTest, @DataJpaTest, or TestRestTemplate)"
+
+  - description: "React + Vitest (no existing tests)"
+    vars:
+      stackJson: '{"language":"typescript","framework":"react","testRunner":"vitest","testCommand":"npx vitest","coverageTool":"vitest-coverage","ci":null,"packageManager":"pnpm"}'
+      testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":18,"patterns":[]}'
+    assert:
+      - type: llm-rubric
+        value: "The response references Vitest (not Jest) and React Testing Library or component testing patterns"
+      - type: contains
+        value: "qa-test-writer"
+
+  - description: "Python + FastAPI + pytest (no existing tests)"
+    vars:
+      stackJson: '{"language":"python","framework":"fastapi","testRunner":"pytest","testCommand":"pytest","coverageTool":"coverage.py","ci":"github-actions","packageManager":"poetry"}'
+      testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":10,"patterns":[]}'
+    assert:
+      - type: llm-rubric
+        value: "The response references FastAPI testing patterns (TestClient, httpx, async testing, or dependency overrides)"
+
+  - description: "Ruby + Rails + RSpec (existing tests)"
+    vars:
+      stackJson: '{"language":"ruby","framework":"rails","testRunner":"rspec","testCommand":"bundle exec rspec","coverageTool":"simplecov","ci":"github-actions","packageManager":"bundler"}'
+      testAnalysisJson: '{"hasTests":true,"testFileCount":25,"sourceFileCount":40,"patterns":[".*_spec\\.rb"],"conventions":{"testLocation":"separate","namingPatterns":["*_spec.rb"]}}'
+    assert:
+      - type: llm-rubric
+        value: "The response references RSpec conventions (describe, context, it, let, subject) and acknowledges the existing spec files"
+      - type: llm-rubric
+        value: "The response references Rails testing patterns (request specs, model specs, factory_bot, or capybara)"

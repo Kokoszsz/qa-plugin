@@ -1,14 +1,37 @@
 description: "qa:audit correctly identifies drift"
 
+providers:
+  - id: anthropic:messages:claude-sonnet-4-20250514
+    config:
+      temperature: 0
+
 prompts:
   - |
-    You are the qa:audit command. Given the following current project state and saved QA configuration, identify which artifacts are CURRENT, OUTDATED, STALE, or MISSING.
+    You are the qa:audit command for a Claude Code QA plugin. Compare the current project state against the saved QA configuration and classify each artifact's status.
+
+    Available statuses:
+    - CURRENT — No drift. Artifact is still accurate.
+    - OUTDATED — Minor drift. Artifact mostly correct but missing new modules or patterns.
+    - STALE — Major drift. Stack or framework changed. Needs full regeneration.
+    - MISSING — Expected artifact doesn't exist.
+
+    Artifacts to evaluate:
+    - qa-test-writer/SKILL.md (depends on: test runner, test command, naming patterns)
+    - qa-use-case-identifier/SKILL.md (depends on: framework, modules)
+    - qa-coverage-analyzer/SKILL.md (depends on: coverage tool)
+    - qa-test-reviewer/SKILL.md (depends on: test runner, patterns)
+    - qa-test-runner/AGENT.md (depends on: test runner, test command)
+    - qa-coverage-checker/AGENT.md (depends on: coverage tool)
+    - qa-test-reviewer/AGENT.md (depends on: test runner)
+    - test/COMMAND.md (depends on: test command)
+    - test-coverage/COMMAND.md (depends on: coverage tool)
+    - test-review/COMMAND.md (depends on: test runner)
 
     Current stack: {{currentStack}}
     Saved config: {{savedConfig}}
     Current test analysis: {{currentTests}}
 
-    Produce an audit report with artifact status.
+    Produce an audit report with status per artifact.
 
 tests:
   - description: "No drift — everything current"
@@ -18,7 +41,9 @@ tests:
       currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":15}'
     assert:
       - type: llm-rubric
-        value: "All artifacts should be marked as CURRENT since nothing has changed"
+        value: "All or most artifacts should be marked as CURRENT since nothing has changed between current stack and saved config"
+      - type: contains
+        value: "CURRENT"
 
   - description: "Test runner changed — should flag STALE"
     vars:
@@ -27,17 +52,19 @@ tests:
       currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":15}'
     assert:
       - type: llm-rubric
-        value: "The test-writer skill and test-runner agent should be marked STALE because the test runner changed from jest to vitest"
-      - type: contains-any
-        value:
-          - "STALE"
-          - "stale"
+        value: "Artifacts that depend on the test runner (qa-test-writer, qa-test-reviewer, qa-test-runner agent, test command) should be marked STALE because the test runner changed from jest to vitest"
+      - type: contains
+        value: "STALE"
 
   - description: "New modules added — should flag OUTDATED"
     vars:
       currentStack: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}'
-      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"},"sourceFileCountAtSync":15}'
       currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":25}'
     assert:
       - type: llm-rubric
-        value: "Some artifacts should be marked OUTDATED since source file count increased significantly (10 new files), indicating new modules that need test coverage guidance"
+        value: "Some artifacts should be marked OUTDATED because source file count grew from 15 to 25, meaning new modules were added that need test coverage guidance"
+      - type: contains-any
+        value:
+          - "OUTDATED"
+          - "outdated"

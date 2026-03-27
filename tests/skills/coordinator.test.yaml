@@ -1,8 +1,25 @@
 description: "qa-coordinator suggests correct next actions"
 
+providers:
+  - id: anthropic:messages:claude-sonnet-4-20250514
+    config:
+      temperature: 0
+
 prompts:
   - |
     You are the qa-coordinator skill. Given the command that just ran and its results, suggest the single most helpful next action.
+
+    Available commands:
+    - /qa:init — Setup QA infrastructure
+    - /qa:audit — Read-only health check
+    - /qa:sync — Regenerate outdated/stale artifacts
+    - /qa:analyze — Deep test health analysis
+    - /qa:status — Quick dashboard
+    - /qa:configure — Adjust preferences
+    - /test — Run tests
+    - /test:coverage — Coverage analysis
+    - /test:review — Test quality review
+    - test-writer skill — Write new tests
 
     Command: {{command}}
     Results: {{results}}
