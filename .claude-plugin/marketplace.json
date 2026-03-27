@@ -3,7 +3,7 @@
   "name": "qa-plugin",
   "description": "Marketplace for AI QA testing automation. Install to get tools that analyze projects and generate tailored QA infrastructure.",
   "owner": {
-    "name": "your-github-username"
+    "name": "Kokoszsz"
   },
   "plugins": [
     {

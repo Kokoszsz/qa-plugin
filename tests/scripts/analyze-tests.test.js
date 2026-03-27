@@ -36,7 +36,7 @@ function writeFile(dir, name, content) {
 }
 
 function runAnalyze(projectRoot, language) {
-  const cmd = `node "${SCRIPT}" --project-root "${projectRoot}" --language ${language} --json`;
+  const cmd = `node "${SCRIPT}" --project-root "${projectRoot}" --language "${language}" --json`;
   const output = execSync(cmd, { encoding: 'utf8', timeout: 10000 });
   return JSON.parse(output.trim());
 }
