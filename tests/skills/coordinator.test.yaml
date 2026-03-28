@@ -16,6 +16,7 @@ prompts:
     - /qa:analyze — Deep test health analysis
     - /qa:status — Quick dashboard
     - /qa:configure — Adjust preferences
+    - /qa:scenarios — Generate Gherkin user scenarios for e2e testing
     - /test — Run tests
     - /test:coverage — Coverage analysis
     - /test:review — Test quality review
@@ -54,3 +55,11 @@ tests:
     assert:
       - type: llm-rubric
         value: "Should suggest using the test-writer skill to add tests for the highest priority module (src/services/)"
+
+  - description: "After scenarios generated — suggest creating e2e tests"
+    vars:
+      command: "/qa:scenarios"
+      results: '{"scenariosGenerated":12,"features":["authentication","checkout","profile"],"outputPath":".claude/scenarios/"}'
+    assert:
+      - type: llm-rubric
+        value: "Should suggest using the test-writer skill to create e2e tests from the generated scenarios"

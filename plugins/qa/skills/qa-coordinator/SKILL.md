@@ -38,6 +38,10 @@ Called at the end of every `/qa:*` command to append a "Suggested next step" lin
 ### After `/qa:configure`
 - "Configuration updated. Run `/qa:sync` to regenerate artifacts with new settings."
 
+### After `/qa:scenarios`
+- If generated from spec: "Scenarios added to [spec file]. Use the test-writer skill to create e2e tests from these scenarios."
+- If generated standalone: "Scenarios saved to `.claude/scenarios/`. Use the test-writer skill to create e2e tests from these scenarios, or run `/qa:scenarios --spec <path>` to attach them to a spec."
+
 ## Output Format
 
 Always output exactly one suggestion line at the end of the command output:

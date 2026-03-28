@@ -9,7 +9,7 @@ Run `/qa:init` and the plugin will:
 1. **Detect your tech stack** — language, framework, test runner, coverage tool, CI
 2. **Analyze existing tests** — patterns, conventions, coverage
 3. **Generate project-specific QA artifacts** into `.claude/`:
-   - 4 skills (test writing, use case identification, coverage analysis, test review)
+   - 5 skills (test writing, scenario generation, use case identification, coverage analysis, test review)
    - 3 agents (test runner, coverage checker, test reviewer)
    - 3 commands (`/test`, `/test:coverage`, `/test:review`)
    - Configuration file with smart defaults
@@ -30,27 +30,98 @@ TypeScript, JavaScript, Python, Go, Rust, Java, Ruby, PHP, Elixir, Swift, Dart �
 ## Quick Start
 
 ```bash
-# Generate QA setup for your project
-/qa:init
-
-# Check QA health
-/qa:status
-
-# Run tests
-/test
-
-# Analyze coverage gaps
-/test:coverage
-
-# Review test quality
-/test:review
+/qa:init        # Generate QA setup for your project
+/qa:status      # Check QA health
 ```
+
+## Usage Guide
+
+### Step 1: Initialize
+
+```
+/qa:init
+```
+
+Run this first in any project. It detects your stack, analyzes existing tests (if any), and generates all QA artifacts into `.claude/`. Works on greenfield projects and projects with existing tests.
+
+### Step 2: Generate User Scenarios
+
+```
+/qa:scenarios                    # From code analysis
+/qa:scenarios --spec docs/auth.md   # From a spec file (e.g., OpenSpec)
+```
+
+Generates functional user scenarios in Gherkin format (Given/When/Then). These describe what your app should do from a user's perspective — no technical details. When used with `--spec`, the scenarios are appended directly to the spec file.
+
+### Step 3: Write Tests
+
+Use the generated skills directly in conversation:
+
+```
+"Write tests for the authentication module"
+"Create e2e tests from the scenarios in .claude/scenarios/authentication.feature"
+"Add unit tests for the payment service"
+```
+
+The qa-test-writer skill knows your project's conventions (framework, naming, location, assertion style) and writes tests that fit.
+
+### Step 4: Run and Analyze
+
+```
+/test                # Run all tests (or /test --changed for only modified files)
+/test:coverage       # Check coverage against thresholds
+/test:review         # Review test quality for anti-patterns
+```
+
+### Step 5: Deep Analysis
+
+```
+/qa:analyze          # Find coverage gaps, quality issues, untested flows
+```
+
+Scans all existing tests and produces a prioritized report of what needs attention.
+
+### Step 6: Keep It Fresh
+
+After making changes to your project (new modules, framework migration, etc.):
+
+```
+/qa:audit            # See what's outdated (read-only)
+/qa:sync             # Regenerate outdated artifacts
+```
+
+### Step 7: Customize
+
+```
+/qa:configure        # Adjust emphasis, thresholds, conventions
+```
+
+Edit `.claude/qa-config.json` to shift testing emphasis, then `/qa:sync` to regenerate.
+
+### Recommended Workflow
+
+```
+/qa:init                          # One-time setup
+  ↓
+/qa:scenarios [--spec <path>]     # Define what to test
+  ↓
+Write tests using skills          # Create tests from scenarios
+  ↓
+/test → /test:coverage → /test:review   # Run, check, review
+  ↓
+/qa:analyze                       # Find remaining gaps
+  ↓
+/qa:audit → /qa:sync              # Keep artifacts fresh after changes
+```
+
+Every command suggests the logical next step. `/qa:status` shows the single most impactful action at any time.
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
 | `/qa:init` | Detect stack, scan project, generate all QA artifacts |
+| `/qa:scenarios` | Generate Gherkin user scenarios for e2e testing |
 | `/qa:audit` | Read-only health check — CURRENT / OUTDATED / STALE / MISSING per artifact |
 | `/qa:sync` | Regenerate outdated artifacts after project changes |
 | `/qa:analyze` | Deep analysis of test quality, coverage gaps, untested flows |
@@ -62,20 +133,27 @@ TypeScript, JavaScript, Python, Go, Rust, Java, Ruby, PHP, Elixir, Swift, Dart �
 After `/qa:init`, your `.claude/` directory gets:
 
 ### Skills
-- **qa-test-writer** — Writes tests following your project's conventions
-- **qa-use-case-identifier** — Maps routes, APIs, components to testable user flows
-- **qa-coverage-analyzer** — Interprets coverage reports, identifies meaningful gaps
-- **qa-test-reviewer** — Reviews test quality (assertions, isolation, edge cases, mocks)
+| Skill | Purpose |
+|-------|---------|
+| **qa-test-writer** | Writes tests following your project's conventions |
+| **qa-scenario-writer** | Generates Gherkin user scenarios for e2e testing |
+| **qa-use-case-identifier** | Maps routes, APIs, components to testable user flows |
+| **qa-coverage-analyzer** | Interprets coverage reports, identifies meaningful gaps |
+| **qa-test-reviewer** | Reviews test quality (assertions, isolation, edge cases, mocks) |
 
 ### Agents
-- **qa-test-runner** — Runs your test suite, parses output into structured results
-- **qa-coverage-checker** — Runs coverage, compares against thresholds
-- **qa-test-reviewer** — Automatically reviews changed test files
+| Agent | Purpose |
+|-------|---------|
+| **qa-test-runner** | Runs your test suite, parses output into structured results |
+| **qa-coverage-checker** | Runs coverage, compares against thresholds |
+| **qa-test-reviewer** | Automatically reviews changed test files |
 
 ### Commands
-- `/test` — Smart test runner (all, single file, or changed files only)
-- `/test:coverage` — Coverage analysis with gap identification
-- `/test:review` — Test quality review for anti-patterns
+| Command | Purpose |
+|---------|---------|
+| `/test` | Smart test runner (all, single file, or changed files only) |
+| `/test:coverage` | Coverage analysis with gap identification |
+| `/test:review` | Test quality review for anti-patterns |
 
 ## Customization
 
@@ -97,22 +175,11 @@ The plugin generates a `.claude/qa-config.json` with smart defaults:
 
 Edit this file to shift emphasis (e.g., `"e2e": "heavy"`), then run `/qa:sync` to regenerate artifacts.
 
-## Workflow
-
-```
-/qa:init  →  /qa:status  →  /test  →  /test:coverage  →  /test:review
-                ↑                                              |
-                └──── /qa:audit  →  /qa:sync ←─────────────────┘
-                        (when project changes)
-```
-
-Every command suggests the logical next step, and `/qa:status` shows the single most impactful action.
-
 ## How It Works
 
 The plugin has two layers:
 
-- **Meta layer** — The 6 `/qa:*` commands that analyze your project and manage QA artifacts
+- **Meta layer** — The `/qa:*` commands that analyze your project and manage QA artifacts
 - **Template layer** — Pre-built skill/agent/command templates that get customized per project
 
 Three Node.js scripts handle mechanical detection (no AI needed for reading `package.json`):
