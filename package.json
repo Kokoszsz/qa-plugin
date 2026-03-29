@@ -8,9 +8,9 @@
   },
   "scripts": {
     "test": "node tests/scripts/detect-stack.test.js && node tests/scripts/analyze-tests.test.js && node tests/scripts/verify-setup.test.js",
-    "test:promptfoo": "cd tests && (promptfoo eval -c skills/init.test.yaml --env-file ../.env || true) && (promptfoo eval -c skills/audit.test.yaml --env-file ../.env || true) && (promptfoo eval -c skills/coordinator.test.yaml --env-file ../.env || true)",
+    "test:promptfoo": "cd tests && (promptfoo eval -c skills/init.test.yaml --env-file ../.env || true) && (promptfoo eval -c skills/sync.test.yaml --env-file ../.env || true) && (promptfoo eval -c skills/coordinator.test.yaml --env-file ../.env || true)",
     "test:promptfoo:init": "cd tests && promptfoo eval -c skills/init.test.yaml --env-file ../.env",
-    "test:promptfoo:audit": "cd tests && promptfoo eval -c skills/audit.test.yaml --env-file ../.env",
+    "test:promptfoo:sync": "cd tests && promptfoo eval -c skills/sync.test.yaml --env-file ../.env",
     "test:promptfoo:coordinator": "cd tests && promptfoo eval -c skills/coordinator.test.yaml --env-file ../.env",
     "test:promptfoo:view": "cd tests && promptfoo view"
   },

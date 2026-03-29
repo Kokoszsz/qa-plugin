@@ -1,4 +1,4 @@
-description: "qa:audit correctly identifies drift"
+description: "qa:sync correctly identifies drift and suggests config changes"
 
 providers:
   - id: anthropic:messages:claude-sonnet-4-20250514
@@ -7,7 +7,7 @@ providers:
 
 prompts:
   - |
-    You are the qa:audit command for a Claude Code QA plugin. Compare the current project state against the saved QA configuration and classify each artifact's status.
+    You are the qa:sync command for a Claude Code QA plugin. Compare the current project state against the saved QA configuration, classify each artifact's status, and suggest configuration changes.
 
     Available statuses:
     - CURRENT — No drift. Artifact is still accurate.
@@ -27,28 +27,33 @@ prompts:
     - test-coverage/COMMAND.md (depends on: coverage tool)
     - test-review/COMMAND.md (depends on: test runner)
 
+    Also check if the project signals suggest enabling new test types:
+    - REST controllers detected → suggest API tests
+    - UI/frontend routes detected → suggest E2E tests
+    - DB repositories detected → suggest integration tests
+
     Current stack: {{currentStack}}
     Saved config: {{savedConfig}}
     Current test analysis: {{currentTests}}
 
-    Produce an audit report with status per artifact.
+    Produce a drift report with status per artifact and any configuration suggestions.
 
 tests:
   - description: "No drift — everything current"
     vars:
-      currentStack: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}'
-      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}}'
+      currentStack: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test","coverageTool":"istanbul"}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test","coverageTool":"istanbul"},"testTypes":{"unit":{"enabled":true}}}'
       currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":15}'
     assert:
       - type: llm-rubric
-        value: "All or most artifacts should be marked as CURRENT since nothing has changed between current stack and saved config"
+        value: "Most artifacts should be marked as CURRENT since the stack has not changed between current and saved config"
       - type: contains
         value: "CURRENT"
 
   - description: "Test runner changed — should flag STALE"
     vars:
       currentStack: '{"language":"typescript","framework":"next","testRunner":"vitest","testCommand":"npx vitest"}'
-      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"},"testTypes":{"unit":{"enabled":true}}}'
       currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":15}'
     assert:
       - type: llm-rubric
@@ -59,7 +64,7 @@ tests:
   - description: "New modules added — should flag OUTDATED"
     vars:
       currentStack: '{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"}'
-      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"},"sourceFileCountAtSync":15}'
+      savedConfig: '{"stack":{"language":"typescript","framework":"next","testRunner":"jest","testCommand":"npm test"},"testTypes":{"unit":{"enabled":true}},"sourceFileCountAtSync":15}'
       currentTests: '{"hasTests":true,"testFileCount":10,"sourceFileCount":25}'
     assert:
       - type: llm-rubric

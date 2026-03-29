@@ -10,17 +10,14 @@ prompts:
     You are the qa-coordinator skill. Given the command that just ran and its results, suggest the single most helpful next action.
 
     Available commands:
-    - /qa:init — Setup QA infrastructure
-    - /qa:audit — Read-only health check
-    - /qa:sync — Regenerate outdated/stale artifacts
+    - /qa:init — One-time setup: detect stack, recommend test types, generate artifacts
+    - /qa:sync — Check health, update config + test types, regenerate artifacts
     - /qa:analyze — Deep test health analysis
-    - /qa:status — Quick dashboard
-    - /qa:configure — Adjust preferences
     - /qa:scenarios — Generate Gherkin user scenarios for e2e testing
-    - /test — Run tests
+    - /test — Run tests (--integration, --e2e, --api, --all, --changed)
     - /test:coverage — Coverage analysis
     - /test:review — Test quality review
-    - test-writer skill — Write new tests
+    - test-writer skills — Write tests (unit, integration, e2e, API)
 
     Command: {{command}}
     Results: {{results}}
@@ -28,25 +25,29 @@ prompts:
     Output exactly one "Suggested next step" line.
 
 tests:
-  - description: "After init with no tests — suggest writing tests"
+  - description: "After init with code and test types selected — suggest writing tests or scenarios"
     vars:
       command: "/qa:init"
-      results: '{"hasTests":false,"artifactsGenerated":11,"stack":"typescript/next/jest"}'
+      results: '{"hasTests":false,"testTypesSelected":["unit","integration","api"],"artifactsGenerated":14,"stack":"kotlin/spring/junit"}'
     assert:
       - type: llm-rubric
-        value: "Should suggest using the test-writer skill to create first tests, or running /qa:analyze"
+        value: "Should suggest a productive next action like writing tests, running /qa:scenarios, or running /test"
 
-  - description: "After audit with stale artifacts — suggest sync"
+  - description: "After init with no code — suggest sync when code exists"
     vars:
-      command: "/qa:audit"
-      results: '{"current":3,"outdated":1,"stale":2,"missing":0}'
+      command: "/qa:init"
+      results: '{"hasTests":false,"hasCode":false,"artifactsGenerated":11,"stack":"unknown"}'
     assert:
       - type: llm-rubric
-        value: "Should suggest running /qa:sync to regenerate the stale artifacts"
-      - type: contains-any
-        value:
-          - "/qa:sync"
-          - "sync"
+        value: "Should suggest using /qa:sync to select test types when code is added"
+
+  - description: "After sync with stale artifacts regenerated — suggest analyze or test"
+    vars:
+      command: "/qa:sync"
+      results: '{"regenerated":3,"created":1,"configChanged":true,"newTestTypes":["api"]}'
+    assert:
+      - type: llm-rubric
+        value: "Should suggest a next action related to testing or analysis, such as /qa:analyze, /test, or writing tests"
 
   - description: "After analyze with gaps — suggest test-writer"
     vars:
@@ -62,4 +63,4 @@ tests:
       results: '{"scenariosGenerated":12,"features":["authentication","checkout","profile"],"outputPath":".claude/scenarios/"}'
     assert:
       - type: llm-rubric
-        value: "Should suggest using the test-writer skill to create e2e tests from the generated scenarios"
+        value: "Should suggest creating or writing e2e tests from the generated scenarios, whether by using the e2e-test-writer skill or running /test --e2e"

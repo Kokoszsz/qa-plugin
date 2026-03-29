@@ -9,33 +9,39 @@ prompts:
   - |
     You are the qa:init command for a Claude Code QA plugin. Given project detection results, describe what QA artifacts you would generate.
 
-    You MUST generate these exact artifacts into the project's .claude/ directory:
+    Init is a ONE-TIME command. If qa-config.json already exists, tell the user to use /qa:configure or /qa:sync instead.
 
-    Skills:
-    - .claude/skills/qa-test-writer/SKILL.md — How to write tests for this project
-    - .claude/skills/qa-use-case-identifier/SKILL.md — How to identify testable user flows
-    - .claude/skills/qa-coverage-analyzer/SKILL.md — How to analyze test coverage
-    - .claude/skills/qa-test-reviewer/SKILL.md — How to review test quality
+    Init detects the stack, then recommends test types based on the code:
+    - Unit — if any source code with logic exists
+    - Integration — if DB repositories, ORM models, service-to-service calls exist
+    - API — if REST controllers, GraphQL resolvers, API routes exist
+    - E2E — if UI pages, frontend routes, user-facing flows exist
 
-    Agents:
-    - .claude/agents/qa-test-runner/AGENT.md — Runs the project's test suite
+    If no code exists (empty project), generate only base artifacts and suggest /qa:configure when code is added.
+
+    Base artifacts (always generated):
+    - .claude/skills/qa-use-case-identifier/SKILL.md — Identifies testable user flows (NOT invoked during init)
+    - .claude/skills/qa-scenario-writer/SKILL.md — Generates Gherkin scenarios
+    - .claude/skills/qa-coverage-analyzer/SKILL.md — Analyzes test coverage
+    - .claude/skills/qa-test-reviewer/SKILL.md — Reviews test quality
+    - .claude/agents/qa-test-runner/AGENT.md — Runs tests across all enabled types
     - .claude/agents/qa-coverage-checker/AGENT.md — Runs coverage analysis
     - .claude/agents/qa-test-reviewer/AGENT.md — Reviews test quality
-
-    Commands:
-    - .claude/commands/test/COMMAND.md — Smart test runner
+    - .claude/commands/test/COMMAND.md — Smart test runner with --integration, --e2e, --api, --all flags
     - .claude/commands/test-coverage/COMMAND.md — Coverage analysis
     - .claude/commands/test-review/COMMAND.md — Test quality review
+    - .claude/qa-config.json — Stack + testTypes + preferences
 
-    Config:
-    - .claude/qa-config.json — Stack detection results and preferences
-
-    Each artifact must be customized to the detected stack. If tests already exist, build on their conventions.
+    Per-type artifacts (only for selected types):
+    - Unit → .claude/skills/qa-test-writer/SKILL.md
+    - Integration → .claude/skills/qa-integration-test-writer/SKILL.md
+    - E2E → .claude/skills/qa-e2e-test-writer/SKILL.md
+    - API → .claude/skills/qa-api-test-writer/SKILL.md
 
     Stack detection: {{stackJson}}
     Test analysis: {{testAnalysisJson}}
 
-    List the exact files you would create and briefly describe how each is customized for this specific project.
+    List the test types you would recommend, the exact files you would create, and briefly describe how each is customized.
 
 tests:
   - description: "TypeScript + Next.js + Jest (no existing tests)"
@@ -50,7 +56,7 @@ tests:
       - type: llm-rubric
         value: "The response mentions Jest as the test runner and references Next.js or React Testing Library patterns"
       - type: llm-rubric
-        value: "The response creates skills, agents, and commands — not just one type of artifact"
+        value: "The response recommends test types based on the project code and creates per-type test-writer skills"
 
   - description: "Python + Django + pytest (existing tests)"
     vars:
@@ -70,13 +76,13 @@ tests:
       - type: llm-rubric
         value: "The response references Go testing conventions (_test.go files, testing.T, or table-driven tests)"
 
-  - description: "Empty/unknown project"
+  - description: "Empty/unknown project — base artifacts only"
     vars:
       stackJson: '{"language":null,"framework":null,"testRunner":null,"testCommand":null,"coverageTool":null,"ci":null,"packageManager":null}'
       testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":0,"patterns":[]}'
     assert:
       - type: llm-rubric
-        value: "The response notes the unknown stack and either asks for clarification, provides generic defaults, or explains it cannot fully customize without stack information"
+        value: "The response generates only base artifacts (no per-type test-writer skills) and suggests using /qa:configure when code is added"
 
   - description: "Rust + Cargo (no existing tests)"
     vars:
@@ -88,7 +94,7 @@ tests:
       - type: contains
         value: "qa-test-writer"
 
-  - description: "Java + Spring Boot + JUnit5 (existing tests)"
+  - description: "Java + Spring Boot + JUnit5 (existing tests) — recommends integration + API"
     vars:
       stackJson: '{"language":"java","framework":"spring-boot","testRunner":"junit5","testCommand":"mvn test","coverageTool":"jacoco","ci":"github-actions","packageManager":"maven"}'
       testAnalysisJson: '{"hasTests":true,"testFileCount":12,"sourceFileCount":30,"patterns":[".*Test\\.java"],"conventions":{"testLocation":"separate","namingPatterns":["*Test.java"]}}'
@@ -96,7 +102,7 @@ tests:
       - type: llm-rubric
         value: "The response references JUnit 5 conventions (@Test, Assertions, or @SpringBootTest) and acknowledges the existing test patterns"
       - type: llm-rubric
-        value: "The response references Spring Boot testing (MockMvc, @WebMvcTest, @DataJpaTest, or TestRestTemplate)"
+        value: "The response recommends integration and/or API test types for a Spring Boot project (since it has controllers and repositories)"
 
   - description: "React + Vitest (no existing tests)"
     vars:
@@ -105,8 +111,8 @@ tests:
     assert:
       - type: llm-rubric
         value: "The response references Vitest (not Jest) and React Testing Library or component testing patterns"
-      - type: contains
-        value: "qa-test-writer"
+      - type: llm-rubric
+        value: "The response recommends E2E test type for a frontend React project"
 
   - description: "Python + FastAPI + pytest (no existing tests)"
     vars:
@@ -115,6 +121,8 @@ tests:
     assert:
       - type: llm-rubric
         value: "The response references FastAPI testing patterns (TestClient, httpx, async testing, or dependency overrides)"
+      - type: llm-rubric
+        value: "The response recommends API test type for a FastAPI project (since it is an API framework)"
 
   - description: "Ruby + Rails + RSpec (existing tests)"
     vars:
@@ -122,6 +130,6 @@ tests:
       testAnalysisJson: '{"hasTests":true,"testFileCount":25,"sourceFileCount":40,"patterns":[".*_spec\\.rb"],"conventions":{"testLocation":"separate","namingPatterns":["*_spec.rb"]}}'
     assert:
       - type: llm-rubric
-        value: "The response references RSpec conventions (describe, context, it, let, subject) and acknowledges the existing spec files"
+        value: "The response acknowledges existing RSpec tests and the *_spec.rb naming convention"
       - type: llm-rubric
         value: "The response references Rails testing patterns (request specs, model specs, factory_bot, or capybara)"

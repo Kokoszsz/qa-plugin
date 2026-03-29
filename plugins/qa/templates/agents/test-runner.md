@@ -1,17 +1,34 @@
 ---
 name: qa-test-runner
-description: "Runs {{testRunner}} tests for this project. Parses output into structured results. Supports running all tests, single files, or by pattern. Use when asked to run, execute, or check tests."
+description: "Runs tests for this project across all configured test types. Reads qa-config.json for runner commands. Parses output into structured results. Supports running all tests, single files, by pattern, or by test type. Use when asked to run, execute, or check tests."
 ---
 
-# Test Runner Agent — {{testRunner}}
+# Test Runner Agent — {{framework}}
 
-Run tests and report results.
+Run tests and report results. Supports multiple test types configured in `qa-config.json`.
 
-## Commands
+## Test Type Commands
 
-### Run all tests
+Read `.claude/qa-config.json` → `testTypes` to determine available commands:
+
+### Unit tests
 ```bash
 {{testCommand}}
+```
+
+### Integration tests (if enabled)
+```bash
+{{integrationTestCommand}}
+```
+
+### E2E tests (if enabled)
+```bash
+{{e2eTestCommand}}
+```
+
+### API tests (if enabled)
+```bash
+{{apiTestCommand}}
 ```
 
 ### Run specific file
@@ -29,7 +46,7 @@ Run tests and report results.
 After running tests, parse the output and report:
 
 ```
-## Test Results
+## Test Results — [Type]
 
 **Status:** PASS / FAIL
 **Total:** N tests
@@ -43,6 +60,8 @@ After running tests, parse the output and report:
    - Expected: X
    - Received: Y
 ```
+
+When running `--all`, report each type separately then a combined summary.
 
 ## Error Handling
 
