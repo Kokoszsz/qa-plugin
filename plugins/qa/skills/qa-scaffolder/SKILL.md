@@ -61,6 +61,19 @@ For each template, substitute project-specific details:
 - `{{namingPattern}}` — test naming pattern (e.g., "*Test.kt")
 - `{{modules}}` — list of project modules from scanner
 - `{{existingPatterns}}` — existing test patterns (if any)
+- `{{fixturePattern}}` — where shared test data lives (e.g., "tests/fixtures/", "conftest.py fixtures", "__fixtures__/")
+- `{{testRunnerCommand}}` — base command for running part of the unit suite; a file or pattern is appended to it (e.g., "npx jest", "pytest", "go test")
+- `{{testFileArg}}` — how to pass one test file to `{{testRunnerCommand}}` (e.g., "src/cart.test.ts" for jest, "tests/test_cart.py" for pytest, "./internal/cart" for go test, which runs packages rather than files)
+- `{{patternArg}}` — how to select tests by name (e.g., `-t "<pattern>"` for jest/vitest, `-k "<pattern>"` for pytest, `-run "<pattern>"` for go test, `--tests "<pattern>"` for Gradle)
+- `{{installCommand}}` — installs the project's dependencies (e.g., "npm ci", "pip install -r requirements.txt", "poetry install", "bundle install")
+- `{{coverageCommand}}` — runs the tests with coverage (e.g., "npx jest --coverage", "pytest --cov --cov-report=term-missing", "go test -cover ./...")
+- `{{coverageThresholdLines}}` — `coverage.thresholds.lines` from `qa-config.json` (default 80)
+- `{{coverageThresholdBranches}}` — `coverage.thresholds.branches` from `qa-config.json` (default 70)
+- `{{timestamp}}` — the current time in ISO 8601 (e.g., "2026-10-19T14:30:00Z")
+
+If a value doesn't apply to this project (for example `{{e2eTestCommand}}` when E2E tests aren't enabled),
+replace it with a short note such as "E2E tests aren't enabled; run `/qa:sync` to enable them". Never leave
+`{{…}}` text in a generated file: the Phase 5 check reports every leftover placeholder as an error.
 
 **Beyond simple substitution:**
 - Add project-specific examples based on actual module names

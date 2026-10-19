@@ -148,6 +148,32 @@ const SCAFFOLDER = read(PLUGIN_ROOT, 'skills', 'qa-scaffolder', 'SKILL.md');
 })();
 
 // ---------------------------------------------------------------------------
+// Test 5: every {{placeholder}} used in a template (or in the scaffolder's own
+// qa-config.json example) is defined in the scaffolder's variable list.
+// Otherwise Claude has to guess the value or leaves the placeholder in.
+// ---------------------------------------------------------------------------
+(function testPlaceholdersDefined() {
+  const defined = new Set(
+    [...SCAFFOLDER.matchAll(/^\s*-\s+`\{\{(\w+)\}\}`/gm)].map(m => m[1]),
+  );
+  const usedIn = new Map();
+  const sources = [
+    ...listMarkdown(path.join(PLUGIN_ROOT, 'templates')),
+    path.join(PLUGIN_ROOT, 'skills', 'qa-scaffolder', 'SKILL.md'),
+  ];
+  for (const file of sources) {
+    for (const m of read(file).matchAll(/\{\{(\w+)\}\}/g)) {
+      if (!usedIn.has(m[1])) usedIn.set(m[1], new Set());
+      usedIn.get(m[1]).add(path.basename(file));
+    }
+  }
+  assert(usedIn.size > 0, 'Found placeholders in the templates');
+  for (const [name, files] of usedIn) {
+    assert(defined.has(name), `{{${name}}} (used in ${[...files].join(', ')}) is defined in the scaffolder's variable list`);
+  }
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n--- Results: ${passed} passed, ${failed} failed ---`);
