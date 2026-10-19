@@ -16,9 +16,13 @@ Called by `/qa:audit` (read-only report) and `/qa:sync` (to determine what to re
 
 ### Phase 1: Gather Current State
 
-1. Run `detect-stack.js` → get current stack info
-2. Run `analyze-tests.js` → get current test analysis
-3. Read `.claude/qa-config.json` → get saved state from last init/sync
+1. Get the current stack and test analysis. `/qa:sync` Step 1 already ran both scripts; reuse that
+   output. If you were invoked without it, run them yourself:
+   ```bash
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <detected-language> --json
+   ```
+2. Read `.claude/qa-config.json` → get saved state from last init/sync
 
 ### Phase 2: Compare
 

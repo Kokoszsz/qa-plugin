@@ -20,25 +20,27 @@ Called by `/qa:init` after the qa-scanner produces its report. Receives:
 
 ### Phase 1: Read Templates
 
-Read template files from the plugin's `templates/` directory based on what needs to be generated.
+Read the template files this run needs from `${CLAUDE_PLUGIN_ROOT}/templates/`. Claude Code replaces
+`${CLAUDE_PLUGIN_ROOT}` with the plugin's install folder when it loads this skill, so the paths below are
+absolute. Never read templates from the project you are scaffolding.
 
 **Always read (base templates):**
-- `templates/skills/use-case-identifier.md`
-- `templates/skills/scenario-writer.md`
-- `templates/skills/coverage-analyzer.md`
-- `templates/skills/test-reviewer.md`
-- `templates/agents/test-runner.md`
-- `templates/agents/coverage-checker.md`
-- `templates/agents/test-reviewer.md`
-- `templates/commands/test.md`
-- `templates/commands/test-coverage.md`
-- `templates/commands/test-review.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/skills/use-case-identifier.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/skills/scenario-writer.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/skills/coverage-analyzer.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/skills/test-reviewer.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/agents/test-runner.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/agents/coverage-checker.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/agents/test-reviewer.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/commands/test.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/commands/test-coverage.md`
+- `${CLAUDE_PLUGIN_ROOT}/templates/commands/test-review.md`
 
 **Read per selected test type:**
-- Unit selected → `templates/skills/test-writer.md`
-- Integration selected → `templates/skills/integration-test-writer.md`
-- E2E selected → `templates/skills/e2e-test-writer.md`
-- API selected → `templates/skills/api-test-writer.md`
+- Unit selected → `${CLAUDE_PLUGIN_ROOT}/templates/skills/test-writer.md`
+- Integration selected → `${CLAUDE_PLUGIN_ROOT}/templates/skills/integration-test-writer.md`
+- E2E selected → `${CLAUDE_PLUGIN_ROOT}/templates/skills/e2e-test-writer.md`
+- API selected → `${CLAUDE_PLUGIN_ROOT}/templates/skills/api-test-writer.md`
 
 ### Phase 2: Customize Templates
 
@@ -157,7 +159,10 @@ Template paths are relative to the templates folder from Phase 1.
 
 ### Phase 5: Validate
 
-Run `verify-setup.js --project-root <path>` to confirm all artifacts are valid.
+Confirm all artifacts are valid:
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/verify-setup.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
+```
 
 If validation fails → fix the failing artifacts before completing.
 

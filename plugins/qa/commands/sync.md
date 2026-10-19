@@ -16,10 +16,11 @@ Check what's outdated, adjust settings, and regenerate artifacts. Run this after
 
 ### Step 1: Re-detect Stack & Scan Project
 
-Run detection and analysis:
+Run detection and analysis. Claude Code replaces `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PROJECT_DIR}` with
+real paths when it loads this command; keep the quotes.
 ```bash
-node <plugin-dir>/scripts/detect-stack.js --project-root <project-root> --json
-node <plugin-dir>/scripts/analyze-tests.js --project-root <project-root> --language <detected-language> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <detected-language> --json
 ```
 
 Compare results against current `qa-config.json`.
@@ -112,7 +113,10 @@ Update the saved stack info, test types, and timestamp in `.claude/qa-config.jso
 
 ### Step 8: Verify
 
-Run `verify-setup.js` to validate all artifacts.
+Validate all artifacts:
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/verify-setup.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
+```
 
 ### Step 9: Summary
 

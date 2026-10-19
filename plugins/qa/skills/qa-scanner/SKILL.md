@@ -10,7 +10,7 @@ Analyze the target project to produce a structured report that the qa-scaffolder
 
 ## When This Skill Is Invoked
 
-This skill is called by the `/qa:init`, `/qa:audit`, and `/qa:sync` commands. It receives pre-computed output from `detect-stack.js` and `analyze-tests.js` as context.
+This skill is called by the `/qa:init`, `/qa:audit`, and `/qa:sync` commands. It receives pre-computed output from `${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.js` and `${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js` as context.
 
 ## Workflow
 

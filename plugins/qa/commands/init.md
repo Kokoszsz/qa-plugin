@@ -15,11 +15,16 @@ Generate a complete QA testing setup tailored to this project. This is a **one-t
 
 ## Execution
 
+Claude Code replaces `${CLAUDE_PLUGIN_ROOT}` with this plugin's install folder and `${CLAUDE_PROJECT_DIR}`
+with the project root when it loads this command. Keep the quotes, so paths with spaces stay one argument.
+If a path still reads literally as `${CLAUDE_PLUGIN_ROOT}`, find this plugin's install folder under
+`~/.claude/plugins/cache/` instead of guessing.
+
 ### Step 1: Detect Stack
 
 Run the detection script:
 ```bash
-node <plugin-dir>/scripts/detect-stack.js --project-root <project-root> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
 ```
 
 Save the JSON output for later steps.
@@ -28,7 +33,7 @@ Save the JSON output for later steps.
 
 Run the analysis script:
 ```bash
-node <plugin-dir>/scripts/analyze-tests.js --project-root <project-root> --language <detected-language> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <detected-language> --json
 ```
 
 Save the JSON output for later steps.
@@ -112,7 +117,7 @@ file path for each one; use those paths, because Claude Code derives command nam
 
 Run the verification script:
 ```bash
-node <plugin-dir>/scripts/verify-setup.js --project-root <project-root> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/verify-setup.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
 ```
 
 If verification fails: fix issues and re-verify.

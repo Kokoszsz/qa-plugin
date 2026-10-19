@@ -94,6 +94,35 @@ const SCAFFOLDER = read(PLUGIN_ROOT, 'skills', 'qa-scaffolder', 'SKILL.md');
 })();
 
 // ---------------------------------------------------------------------------
+// Test 3: bundled scripts and templates are referenced through
+// ${CLAUDE_PLUGIN_ROOT}, which Claude Code replaces with the install path
+// when it loads the Markdown. Anything else leaves Claude guessing.
+// ---------------------------------------------------------------------------
+(function testPluginRootReferences() {
+  const ROOT = '${CLAUDE_PLUGIN_ROOT}/';
+  for (const file of listMarkdown(PLUGIN_ROOT)) {
+    const content = read(file);
+    assert(!content.includes('<plugin-dir>'), `${rel(file)} has no <plugin-dir> placeholder`);
+
+    // Path prefixes stop at whitespace, quotes, backticks and brackets, so
+    // "${CLAUDE_PLUGIN_ROOT}/scripts/x.js" (quoted for paths with spaces) passes.
+    const bad = [];
+    const scriptRef = /(?:[^\s"'`([]*\/)?(?:detect-stack|analyze-tests|verify-setup)\.js/g;
+    for (const m of content.matchAll(scriptRef)) {
+      if (!m[0].startsWith(`${ROOT}scripts/`)) bad.push(m[0]);
+    }
+    const templateRef = /[^\s"'`([]*templates\//g;
+    for (const m of content.matchAll(templateRef)) {
+      if (m[0] !== `${ROOT}templates/`) bad.push(m[0]);
+    }
+    assert(
+      bad.length === 0,
+      `${rel(file)} references scripts/templates via ${ROOT}` + (bad.length ? ` (found: ${bad.join(', ')})` : ''),
+    );
+  }
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n--- Results: ${passed} passed, ${failed} failed ---`);
