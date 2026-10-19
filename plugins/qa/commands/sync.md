@@ -36,10 +36,11 @@ Show what has changed since last init/sync:
 - Framework: react (unchanged)
 
 ### Artifact Status
-- qa-test-writer/SKILL.md — STALE (test runner changed)
-- qa-test-runner/AGENT.md — STALE (test runner changed)
-- qa-coverage-analyzer/SKILL.md — CURRENT
-- qa-e2e-test-writer/SKILL.md — MISSING (e2e is enabled but skill doesn't exist)
+- skills/qa-test-writer/SKILL.md — STALE (test runner changed)
+- agents/qa-test-runner.md — STALE (test runner changed)
+- skills/qa-coverage-analyzer/SKILL.md — CURRENT
+- skills/qa-e2e-test-writer/SKILL.md — MISSING (e2e is enabled but skill doesn't exist)
+- 0.1.0 layout — 3 commands and 3 agents at old paths, will be moved (Step 5)
 
 ### Configuration Suggestions
 - Detected 3 new REST controllers → consider enabling API tests
@@ -63,38 +64,57 @@ Display what will be updated:
 ```
 ## Sync Plan
 
+Will move (0.1.0 layout, see Step 5):
+- 3 commands and 3 agents to their new paths
+
 Will regenerate:
-- qa-test-writer/SKILL.md (STALE — test runner changed)
-- qa-test-runner/AGENT.md (STALE — test runner changed)
-- test/COMMAND.md (STALE — test command changed)
+- skills/qa-test-writer/SKILL.md (STALE — test runner changed)
+- agents/qa-test-runner.md (STALE — test runner changed)
+- commands/test.md (STALE — test command changed)
 
 Will generate (new):
-- qa-api-test-writer/SKILL.md (API tests newly enabled)
+- skills/qa-api-test-writer/SKILL.md (API tests newly enabled)
 
 Will keep:
-- qa-coverage-analyzer/SKILL.md (CURRENT)
-- qa-test-reviewer/SKILL.md (CURRENT)
+- skills/qa-coverage-analyzer/SKILL.md (CURRENT)
+- skills/qa-test-reviewer/SKILL.md (CURRENT)
 
 Proceed? (yes/no)
 ```
 
 Wait for user confirmation.
 
-### Step 5: Regenerate
+### Step 5: Move the 0.1.0 layout (if present)
+
+Version 0.1.0 wrote commands and agents to paths that Claude Code registers under the wrong names.
+If any file in the left column exists, move it to the right column, keeping any edits the user made.
+Then delete the old file, and delete the `test-coverage/`, `test-review/` and `agents/qa-*/` folders once
+they're empty. Treat each moved file as OUTDATED in Step 6.
+
+| 0.1.0 path | Registered as | Move to |
+|------------|---------------|---------|
+| `.claude/commands/test/COMMAND.md` | `/test:COMMAND` | `.claude/commands/test.md` |
+| `.claude/commands/test-coverage/COMMAND.md` | `/test-coverage:COMMAND` | `.claude/commands/test/coverage.md` |
+| `.claude/commands/test-review/COMMAND.md` | `/test-review:COMMAND` | `.claude/commands/test/review.md` |
+| `.claude/agents/qa-test-runner/AGENT.md` | agent (non-standard path) | `.claude/agents/qa-test-runner.md` |
+| `.claude/agents/qa-coverage-checker/AGENT.md` | agent (non-standard path) | `.claude/agents/qa-coverage-checker.md` |
+| `.claude/agents/qa-test-reviewer/AGENT.md` | agent (non-standard path) | `.claude/agents/qa-test-reviewer.md` |
+
+### Step 6: Regenerate
 
 For STALE artifacts: invoke `qa-scaffolder` to fully regenerate from templates.
 For OUTDATED artifacts: invoke `qa-scaffolder` to extend with new information while preserving existing customizations.
 For MISSING artifacts (newly enabled types): generate from templates.
 
-### Step 6: Update qa-config.json
+### Step 7: Update qa-config.json
 
 Update the saved stack info, test types, and timestamp in `.claude/qa-config.json`.
 
-### Step 7: Verify
+### Step 8: Verify
 
 Run `verify-setup.js` to validate all artifacts.
 
-### Step 8: Summary
+### Step 9: Summary
 
 Show what changed:
 
@@ -106,6 +126,6 @@ Show what changed:
 - Configuration updated (API tests enabled)
 ```
 
-### Step 9: Suggest Next Step
+### Step 10: Suggest Next Step
 
 Invoke `qa-coordinator`.

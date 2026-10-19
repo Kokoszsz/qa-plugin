@@ -50,6 +50,9 @@ For each generated artifact, assign a status:
 - **STALE** — Major drift. Stack or framework changed. Artifact needs full regeneration.
 - **MISSING** — Expected artifact doesn't exist (e.g., new module type needs new guidance).
 
+An artifact that still sits at its 0.1.0 path (see the table in `/qa:sync` Step 5) is **STALE**,
+because Claude Code registers it under the wrong name. `/qa:sync` moves it before regenerating.
+
 ### Phase 4: Produce Report
 
 ```
@@ -62,12 +65,12 @@ For each generated artifact, assign a status:
 ### Artifact Status
 | Artifact | Status | Reason |
 |----------|--------|--------|
-| qa-test-writer/SKILL.md | STALE | Test runner changed from jest to vitest |
-| qa-use-case-identifier/SKILL.md | OUTDATED | 3 new API routes not covered |
-| qa-coverage-analyzer/SKILL.md | CURRENT | — |
-| qa-test-reviewer/SKILL.md | CURRENT | — |
-| test-runner/AGENT.md | STALE | Test runner changed |
-| test/COMMAND.md | STALE | Test command changed |
+| skills/qa-test-writer/SKILL.md | STALE | Test runner changed from jest to vitest |
+| skills/qa-use-case-identifier/SKILL.md | OUTDATED | 3 new API routes not covered |
+| skills/qa-coverage-analyzer/SKILL.md | CURRENT | — |
+| skills/qa-test-reviewer/SKILL.md | CURRENT | — |
+| agents/qa-test-runner.md | STALE | Test runner changed |
+| commands/test.md | STALE | Test command changed |
 
 ### Recommended Actions
 1. Run /qa:sync to regenerate STALE artifacts

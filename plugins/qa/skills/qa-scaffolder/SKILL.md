@@ -123,26 +123,37 @@ Set `enabled: true` and populate `runner` + `command` only for test types the us
 
 ### Phase 4: Write Files
 
-Write all generated files to the project's `.claude/` directory:
+Write each file to the project's `.claude/` directory at exactly the path below. File names matter:
+Claude Code names a project command after its path under `.claude/commands/`, turning each `/` into `:`
+and dropping `.md`, so `.claude/commands/test/coverage.md` becomes `/test:coverage`. Agents are flat
+`.md` files, and the `name` in their frontmatter must match the file name.
+
+Template paths are relative to the templates folder from Phase 1.
 
 **Always written (base):**
-1. `.claude/qa-config.json`
-2. `.claude/skills/qa-use-case-identifier/SKILL.md`
-3. `.claude/skills/qa-scenario-writer/SKILL.md`
-4. `.claude/skills/qa-coverage-analyzer/SKILL.md`
-5. `.claude/skills/qa-test-reviewer/SKILL.md`
-6. `.claude/agents/qa-test-runner/AGENT.md`
-7. `.claude/agents/qa-coverage-checker/AGENT.md`
-8. `.claude/agents/qa-test-reviewer/AGENT.md`
-9. `.claude/commands/test/COMMAND.md`
-10. `.claude/commands/test-coverage/COMMAND.md`
-11. `.claude/commands/test-review/COMMAND.md`
+
+| # | Template | Write to | Shows up as |
+|---|----------|----------|-------------|
+| 1 | (Phase 3) | `.claude/qa-config.json` | QA configuration |
+| 2 | `skills/use-case-identifier.md` | `.claude/skills/qa-use-case-identifier/SKILL.md` | skill `qa-use-case-identifier` |
+| 3 | `skills/scenario-writer.md` | `.claude/skills/qa-scenario-writer/SKILL.md` | skill `qa-scenario-writer` |
+| 4 | `skills/coverage-analyzer.md` | `.claude/skills/qa-coverage-analyzer/SKILL.md` | skill `qa-coverage-analyzer` |
+| 5 | `skills/test-reviewer.md` | `.claude/skills/qa-test-reviewer/SKILL.md` | skill `qa-test-reviewer` |
+| 6 | `agents/test-runner.md` | `.claude/agents/qa-test-runner.md` | agent `qa-test-runner` |
+| 7 | `agents/coverage-checker.md` | `.claude/agents/qa-coverage-checker.md` | agent `qa-coverage-checker` |
+| 8 | `agents/test-reviewer.md` | `.claude/agents/qa-test-reviewer.md` | agent `qa-test-reviewer` |
+| 9 | `commands/test.md` | `.claude/commands/test.md` | `/test` |
+| 10 | `commands/test-coverage.md` | `.claude/commands/test/coverage.md` | `/test:coverage` |
+| 11 | `commands/test-review.md` | `.claude/commands/test/review.md` | `/test:review` |
 
 **Written per selected test type:**
-12. Unit → `.claude/skills/qa-test-writer/SKILL.md`
-13. Integration → `.claude/skills/qa-integration-test-writer/SKILL.md`
-14. E2E → `.claude/skills/qa-e2e-test-writer/SKILL.md`
-15. API → `.claude/skills/qa-api-test-writer/SKILL.md`
+
+| # | Test type | Template | Write to |
+|---|-----------|----------|----------|
+| 12 | Unit | `skills/test-writer.md` | `.claude/skills/qa-test-writer/SKILL.md` |
+| 13 | Integration | `skills/integration-test-writer.md` | `.claude/skills/qa-integration-test-writer/SKILL.md` |
+| 14 | E2E | `skills/e2e-test-writer.md` | `.claude/skills/qa-e2e-test-writer/SKILL.md` |
+| 15 | API | `skills/api-test-writer.md` | `.claude/skills/qa-api-test-writer/SKILL.md` |
 
 ### Phase 5: Validate
 

@@ -85,7 +85,8 @@ Invoke the `qa-scaffolder` skill with:
 
 #### Step 5a: Base artifacts (always generated)
 
-These are generated regardless of selected test types:
+These are generated regardless of selected test types. The scaffolder's Phase 4 table gives the exact
+file path for each one; use those paths, because Claude Code derives command names from them.
 - `qa-use-case-identifier` skill — available for later use, **NOT invoked during init**
 - `qa-scenario-writer` skill — available for later use
 - `qa-coverage-analyzer` skill
@@ -93,9 +94,9 @@ These are generated regardless of selected test types:
 - `qa-test-runner` agent (single agent, handles all test types)
 - `qa-coverage-checker` agent
 - `qa-test-reviewer` agent
-- `/test` command (with flags for enabled types)
-- `/test:coverage` command
-- `/test:review` command
+- `/test` command (with flags for enabled types) — `.claude/commands/test.md`
+- `/test:coverage` command — `.claude/commands/test/coverage.md`
+- `/test:review` command — `.claude/commands/test/review.md`
 - `qa-config.json` with detected stack + selected `testTypes`
 
 #### Step 5b: Per-type artifacts (only for selected types)
@@ -136,8 +137,8 @@ Print a summary:
 - E2E —
 
 ### Generated Artifacts
-- N skills in .claude/skills/qa-*
-- 3 agents in .claude/agents/qa-*
+- N skills in .claude/skills/qa-*/SKILL.md
+- 3 agents in .claude/agents/qa-*.md
 - 3 commands: /test, /test:coverage, /test:review
 - Configuration: .claude/qa-config.json
 
