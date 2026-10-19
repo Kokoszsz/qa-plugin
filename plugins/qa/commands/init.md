@@ -120,7 +120,8 @@ Run the verification script:
 node "${CLAUDE_PLUGIN_ROOT}/scripts/verify-setup.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
 ```
 
-If verification fails: fix issues and re-verify.
+If verification fails: fix issues and re-verify. The script only reports files this command generated
+(including leftover `{{…}}` placeholders); never edit other files in `.claude/` to make it pass.
 
 ### Step 7: Report
 

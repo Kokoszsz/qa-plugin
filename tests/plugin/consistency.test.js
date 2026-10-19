@@ -174,6 +174,27 @@ const SCAFFOLDER = read(PLUGIN_ROOT, 'skills', 'qa-scaffolder', 'SKILL.md');
 })();
 
 // ---------------------------------------------------------------------------
+// Test 6: verify-setup.js and the Markdown agree on the generated layout.
+// The scaffolder writes what verify-setup expects, and /qa:sync's migration
+// table moves every 0.1.0 path verify-setup flags to the right new path.
+// ---------------------------------------------------------------------------
+(function testVerifySetupMatchesScaffolder() {
+  const { BASE_ARTIFACTS, TEST_TYPE_SKILLS, LEGACY_PATHS } = require(path.join(PLUGIN_ROOT, 'scripts', 'verify-setup.js'));
+  for (const artifact of [...BASE_ARTIFACTS, ...Object.values(TEST_TYPE_SKILLS)]) {
+    assert(SCAFFOLDER.includes(`.claude/${artifact.path}`), `Scaffolder writes .claude/${artifact.path}, which verify-setup expects`);
+  }
+
+  const syncLines = read(PLUGIN_ROOT, 'commands', 'sync.md').split(/\r?\n/);
+  for (const legacy of LEGACY_PATHS) {
+    const row = syncLines.find(line => line.includes(`.claude/${legacy.path}`));
+    assert(
+      Boolean(row) && row.includes(`.claude/${legacy.newPath}`),
+      `/qa:sync moves .claude/${legacy.path} to .claude/${legacy.newPath}`,
+    );
+  }
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n--- Results: ${passed} passed, ${failed} failed ---`);
