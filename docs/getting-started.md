@@ -10,7 +10,7 @@
 
 ### Via CLI
 ```
-/plugin marketplace add <your-github-username>/qa-plugin
+/plugin marketplace add Kokoszsz/qa-plugin
 /plugin install qa@qa-plugin
 ```
 
@@ -22,15 +22,9 @@
 ```
 This analyzes your project and generates QA infrastructure into `.claude/`.
 
-### Check health
+### Check health and keep artifacts current
 ```
-/qa:status
-```
-
-### After project changes
-```
-/qa:audit    # See what's outdated
-/qa:sync     # Regenerate outdated artifacts
+/qa:sync     # Shows what's outdated, then regenerates it after you confirm
 ```
 
 ### Deep analysis
@@ -40,14 +34,9 @@ This analyzes your project and generates QA infrastructure into `.claude/`.
 
 ### Run tests
 ```
-/test              # Run all tests
+/test              # Run unit tests (add --integration, --e2e, --api or --all)
 /test:coverage     # Coverage analysis
 /test:review       # Test quality review
-```
-
-### Customize
-```
-/qa:configure      # Adjust emphasis, thresholds, conventions
 ```
 
 ## What Gets Generated
@@ -55,20 +44,23 @@ This analyzes your project and generates QA infrastructure into `.claude/`.
 After running `/qa:init`, your project gets:
 
 ### Skills (in `.claude/skills/`)
-- `qa-test-writer` — Knows how to write tests for your specific project
 - `qa-use-case-identifier` — Identifies testable user flows and scenarios
+- `qa-scenario-writer` — Writes Gherkin user scenarios
 - `qa-coverage-analyzer` — Interprets coverage reports for your stack
 - `qa-test-reviewer` — Reviews test quality with stack-specific checks
+- One test-writer skill per test type you enable: `qa-test-writer` (unit), `qa-integration-test-writer`,
+  `qa-e2e-test-writer`, `qa-api-test-writer`
 
 ### Agents (in `.claude/agents/`)
-- `qa-test-runner` — Runs your test suite and parses results
-- `qa-coverage-checker` — Runs coverage and compares against thresholds
-- `qa-test-reviewer` — Automatically reviews changed test files
+- `qa-test-runner.md` — Runs your test suite and parses results
+- `qa-coverage-checker.md` — Runs coverage and compares against thresholds
+- `qa-test-reviewer.md` — Reviews changed test files
 
 ### Commands (in `.claude/commands/`)
-- `/test` — Smart test runner
-- `/test:coverage` — Coverage analysis
-- `/test:review` — Test quality review
+Claude Code names a command after its path, so:
+- `test.md` — `/test`, the smart test runner
+- `test/coverage.md` — `/test:coverage`, coverage analysis
+- `test/review.md` — `/test:review`, test quality review
 
 ### Configuration
 - `.claude/qa-config.json` — Stack detection results and preferences
@@ -80,4 +72,10 @@ Edit `.claude/qa-config.json` to adjust:
 - **Thresholds** — Set coverage targets for lines and branches
 - **Conventions** — Override detected test location and naming patterns
 
-After editing, run `/qa:sync` to regenerate artifacts with the new settings.
+After editing, run `/qa:sync` to regenerate artifacts with the new settings. `/qa:sync` can also enable or
+disable test types for you.
+
+## Upgrading from 0.1.0
+
+0.1.0 generated its commands at paths that Claude Code registered as `/test:COMMAND` instead of `/test`.
+After updating the plugin, run `/qa:sync` once: it moves the old files to the new paths and keeps your edits.

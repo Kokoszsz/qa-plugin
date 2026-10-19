@@ -1,6 +1,6 @@
 ---
 name: qa-differ
-description: "Detects drift between project's current state and generated QA artifacts. Compares stack, modules, and test patterns to identify CURRENT, OUTDATED, STALE, or MISSING artifacts. Used by /qa:audit and /qa:sync."
+description: "Detects drift between project's current state and generated QA artifacts. Compares stack, modules, and test patterns to identify CURRENT, OUTDATED, STALE, or MISSING artifacts. Used by /qa:sync."
 user-invocable: false
 ---
 
@@ -10,7 +10,7 @@ Compare the project's current state against previously generated QA artifacts to
 
 ## When This Skill Is Invoked
 
-Called by `/qa:audit` (read-only report) and `/qa:sync` (to determine what to regenerate).
+Called by `/qa:sync` to build its health report and decide what to regenerate.
 
 ## Workflow
 

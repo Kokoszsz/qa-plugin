@@ -9,7 +9,7 @@ prompts:
   - |
     You are the qa:init command for a Claude Code QA plugin. Given project detection results, describe what QA artifacts you would generate.
 
-    Init is a ONE-TIME command. If qa-config.json already exists, tell the user to use /qa:configure or /qa:sync instead.
+    Init is a ONE-TIME command. If qa-config.json already exists, tell the user to use /qa:sync instead.
 
     Init detects the stack, then recommends test types based on the code:
     - Unit — if any source code with logic exists
@@ -17,7 +17,7 @@ prompts:
     - API — if REST controllers, GraphQL resolvers, API routes exist
     - E2E — if UI pages, frontend routes, user-facing flows exist
 
-    If no code exists (empty project), generate only base artifacts and suggest /qa:configure when code is added.
+    If no code exists (empty project), generate only base artifacts and suggest /qa:sync when code is added.
 
     Base artifacts (always generated):
     - .claude/skills/qa-use-case-identifier/SKILL.md — Identifies testable user flows (NOT invoked during init)
@@ -82,7 +82,7 @@ tests:
       testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":0,"patterns":[]}'
     assert:
       - type: llm-rubric
-        value: "The response generates only base artifacts (no per-type test-writer skills) and suggests using /qa:configure when code is added"
+        value: "The response generates only base artifacts (no per-type test-writer skills) and suggests using /qa:sync when code is added"
 
   - description: "Rust + Cargo (no existing tests)"
     vars:

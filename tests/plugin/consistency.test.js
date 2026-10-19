@@ -123,6 +123,31 @@ const SCAFFOLDER = read(PLUGIN_ROOT, 'skills', 'qa-scaffolder', 'SKILL.md');
 })();
 
 // ---------------------------------------------------------------------------
+// Test 4: no references to commands removed in b096ed5. Every generated
+// project would otherwise tell users to run a command that doesn't exist.
+// (docs/plans/ is a dated design record and is left as written.)
+// ---------------------------------------------------------------------------
+(function testNoRemovedCommands() {
+  const files = [
+    ...listMarkdown(PLUGIN_ROOT),
+    path.join(REPO_ROOT, 'README.md'),
+    ...fs.readdirSync(path.join(REPO_ROOT, 'docs'))
+      .filter(name => name.endsWith('.md'))
+      .map(name => path.join(REPO_ROOT, 'docs', name)),
+    ...fs.readdirSync(path.join(REPO_ROOT, 'tests', 'skills'))
+      .filter(name => name.endsWith('.yaml'))
+      .map(name => path.join(REPO_ROOT, 'tests', 'skills', name)),
+  ];
+  for (const file of files) {
+    const found = read(file).match(/\/qa:(?:audit|status|configure)\b/g) || [];
+    assert(
+      found.length === 0,
+      `${rel(file)} doesn't mention removed commands` + (found.length ? ` (found: ${[...new Set(found)].join(', ')})` : ''),
+    );
+  }
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n--- Results: ${passed} passed, ${failed} failed ---`);
