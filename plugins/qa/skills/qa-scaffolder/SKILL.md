@@ -70,6 +70,7 @@ For each template, substitute project-specific details:
 - `{{coverageThresholdLines}}` — `coverage.thresholds.lines` from `qa-config.json` (default 80)
 - `{{coverageThresholdBranches}}` — `coverage.thresholds.branches` from `qa-config.json` (default 70)
 - `{{timestamp}}` — the current time in ISO 8601 (e.g., "2026-10-19T14:30:00Z")
+- `{{pluginVersion}}` — the `version` field of `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` (e.g., "0.2.0"); `/qa:sync` compares it to spot artifacts from an older release
 
 If a value doesn't apply to this project (for example `{{e2eTestCommand}}` when E2E tests aren't enabled),
 replace it with a short note such as "E2E tests aren't enabled; run `/qa:sync` to enable them". Never leave
@@ -130,7 +131,7 @@ replace it with a short note such as "E2E tests aren't enabled; run `/qa:sync` t
     "thresholds": { "lines": 80, "branches": 70 }
   },
   "generatedAt": "{{timestamp}}",
-  "pluginVersion": "0.1.0"
+  "pluginVersion": "{{pluginVersion}}"
 }
 ```
 

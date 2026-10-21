@@ -195,6 +195,18 @@ const SCAFFOLDER = read(PLUGIN_ROOT, 'skills', 'qa-scaffolder', 'SKILL.md');
 })();
 
 // ---------------------------------------------------------------------------
+// Test 7: plugin.json and package.json carry the same version, and the
+// CHANGELOG has an entry for it. Claude Code only updates installed copies
+// when plugin.json's version changes, so a release must bump it.
+// ---------------------------------------------------------------------------
+(function testVersionsMatch() {
+  const pluginVersion = JSON.parse(read(PLUGIN_ROOT, '.claude-plugin', 'plugin.json')).version;
+  const packageVersion = JSON.parse(read(REPO_ROOT, 'package.json')).version;
+  assert(pluginVersion === packageVersion, `plugin.json (${pluginVersion}) and package.json (${packageVersion}) versions match`);
+  assert(read(REPO_ROOT, 'CHANGELOG.md').includes(`## ${pluginVersion}`), `CHANGELOG.md has a "## ${pluginVersion}" entry`);
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n--- Results: ${passed} passed, ${failed} failed ---`);

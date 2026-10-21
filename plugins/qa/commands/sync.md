@@ -20,10 +20,12 @@ Run detection and analysis. Claude Code replaces `${CLAUDE_PLUGIN_ROOT}` and `${
 real paths when it loads this command; keep the quotes.
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
-node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <detected-language> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <language> --json
 ```
 
-Compare results against current `qa-config.json`.
+Run the second (analysis) command once for each language in the detection output's `languages` list.
+Compare results against current `qa-config.json`. If its `pluginVersion` is older than the `version` in
+`${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`, treat every generated artifact as OUTDATED.
 
 ### Step 2: Drift Report
 

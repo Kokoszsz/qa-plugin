@@ -33,10 +33,14 @@ Save the JSON output for later steps.
 
 Run the analysis script:
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <detected-language> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <language> --json
 ```
 
-Save the JSON output for later steps.
+Run it once for each language in the detection output's `languages` list (a repo with a Python
+backend and a TypeScript frontend needs two runs). Each project in `projects` already has a
+`testCommand` that works from the repo root, so use those commands as they are.
+
+Treat the project as empty (next section) only when `languages` is empty and every run found 0 source files.
 
 ### Step 3: Deep Project Scan
 

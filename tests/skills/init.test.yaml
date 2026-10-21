@@ -1,7 +1,7 @@
 description: "qa:init scaffolds correctly for different project types"
 
 providers:
-  - id: anthropic:messages:claude-sonnet-4-20250514
+  - id: anthropic:messages:claude-sonnet-5-5
     config:
       temperature: 0
 
@@ -24,12 +24,12 @@ prompts:
     - .claude/skills/qa-scenario-writer/SKILL.md — Generates Gherkin scenarios
     - .claude/skills/qa-coverage-analyzer/SKILL.md — Analyzes test coverage
     - .claude/skills/qa-test-reviewer/SKILL.md — Reviews test quality
-    - .claude/agents/qa-test-runner/AGENT.md — Runs tests across all enabled types
-    - .claude/agents/qa-coverage-checker/AGENT.md — Runs coverage analysis
-    - .claude/agents/qa-test-reviewer/AGENT.md — Reviews test quality
-    - .claude/commands/test/COMMAND.md — Smart test runner with --integration, --e2e, --api, --all flags
-    - .claude/commands/test-coverage/COMMAND.md — Coverage analysis
-    - .claude/commands/test-review/COMMAND.md — Test quality review
+    - .claude/agents/qa-test-runner.md — Runs tests across all enabled types
+    - .claude/agents/qa-coverage-checker.md — Runs coverage analysis
+    - .claude/agents/qa-test-reviewer.md — Reviews test quality
+    - .claude/commands/test.md — Smart test runner with --integration, --e2e, --api, --all flags
+    - .claude/commands/test/coverage.md — Coverage analysis
+    - .claude/commands/test/review.md — Test quality review
     - .claude/qa-config.json — Stack + testTypes + preferences
 
     Per-type artifacts (only for selected types):

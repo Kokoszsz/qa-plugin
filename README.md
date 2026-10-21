@@ -126,7 +126,7 @@ TypeScript, JavaScript, Python, Go, Rust, Java, Ruby, PHP, Elixir, Swift, Dart â
 ## Contributing
 
 ```bash
-npm test                       # Script tests (68 assertions)
+npm test                       # Script tests + plugin consistency checks (no API calls)
 npm run test:promptfoo         # Behavioral tests (requires ANTHROPIC_API_KEY)
 npm run test:promptfoo:init    # Init tests only
 npm run test:promptfoo:sync    # Sync tests only
