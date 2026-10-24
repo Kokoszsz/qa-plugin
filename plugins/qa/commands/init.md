@@ -15,11 +15,16 @@ Generate a complete QA testing setup tailored to this project. This is a **one-t
 
 ## Execution
 
+Claude Code replaces `${CLAUDE_PLUGIN_ROOT}` with this plugin's install folder and `${CLAUDE_PROJECT_DIR}`
+with the project root when it loads this command. Keep the quotes, so paths with spaces stay one argument.
+If a path still reads literally as `${CLAUDE_PLUGIN_ROOT}`, find this plugin's install folder under
+`~/.claude/plugins/cache/` instead of guessing.
+
 ### Step 1: Detect Stack
 
 Run the detection script:
 ```bash
-node <plugin-dir>/scripts/detect-stack.js --project-root <project-root> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
 ```
 
 Save the JSON output for later steps.
@@ -28,10 +33,14 @@ Save the JSON output for later steps.
 
 Run the analysis script:
 ```bash
-node <plugin-dir>/scripts/analyze-tests.js --project-root <project-root> --language <detected-language> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-tests.js" --project-root "${CLAUDE_PROJECT_DIR}" --language <language> --json
 ```
 
-Save the JSON output for later steps.
+Run it once for each language in the detection output's `languages` list (a repo with a Python
+backend and a TypeScript frontend needs two runs). Each project in `projects` already has a
+`testCommand` that works from the repo root, so use those commands as they are.
+
+Treat the project as empty (next section) only when `languages` is empty and every run found 0 source files.
 
 ### Step 3: Deep Project Scan
 
@@ -85,7 +94,8 @@ Invoke the `qa-scaffolder` skill with:
 
 #### Step 5a: Base artifacts (always generated)
 
-These are generated regardless of selected test types:
+These are generated regardless of selected test types. The scaffolder's Phase 4 table gives the exact
+file path for each one; use those paths, because Claude Code derives command names from them.
 - `qa-use-case-identifier` skill — available for later use, **NOT invoked during init**
 - `qa-scenario-writer` skill — available for later use
 - `qa-coverage-analyzer` skill
@@ -93,9 +103,9 @@ These are generated regardless of selected test types:
 - `qa-test-runner` agent (single agent, handles all test types)
 - `qa-coverage-checker` agent
 - `qa-test-reviewer` agent
-- `/test` command (with flags for enabled types)
-- `/test:coverage` command
-- `/test:review` command
+- `/test` command (with flags for enabled types) — `.claude/commands/test.md`
+- `/test:coverage` command — `.claude/commands/test/coverage.md`
+- `/test:review` command — `.claude/commands/test/review.md`
 - `qa-config.json` with detected stack + selected `testTypes`
 
 #### Step 5b: Per-type artifacts (only for selected types)
@@ -111,10 +121,11 @@ These are generated regardless of selected test types:
 
 Run the verification script:
 ```bash
-node <plugin-dir>/scripts/verify-setup.js --project-root <project-root> --json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/verify-setup.js" --project-root "${CLAUDE_PROJECT_DIR}" --json
 ```
 
-If verification fails: fix issues and re-verify.
+If verification fails: fix issues and re-verify. The script only reports files this command generated
+(including leftover `{{…}}` placeholders); never edit other files in `.claude/` to make it pass.
 
 ### Step 7: Report
 
@@ -136,8 +147,8 @@ Print a summary:
 - E2E —
 
 ### Generated Artifacts
-- N skills in .claude/skills/qa-*
-- 3 agents in .claude/agents/qa-*
+- N skills in .claude/skills/qa-*/SKILL.md
+- 3 agents in .claude/agents/qa-*.md
 - 3 commands: /test, /test:coverage, /test:review
 - Configuration: .claude/qa-config.json
 

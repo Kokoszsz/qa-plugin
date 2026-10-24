@@ -1,7 +1,7 @@
 description: "qa:init scaffolds correctly for different project types"
 
 providers:
-  - id: anthropic:messages:claude-sonnet-4-20250514
+  - id: anthropic:messages:claude-sonnet-5-5
     config:
       temperature: 0
 
@@ -9,7 +9,7 @@ prompts:
   - |
     You are the qa:init command for a Claude Code QA plugin. Given project detection results, describe what QA artifacts you would generate.
 
-    Init is a ONE-TIME command. If qa-config.json already exists, tell the user to use /qa:configure or /qa:sync instead.
+    Init is a ONE-TIME command. If qa-config.json already exists, tell the user to use /qa:sync instead.
 
     Init detects the stack, then recommends test types based on the code:
     - Unit — if any source code with logic exists
@@ -17,19 +17,19 @@ prompts:
     - API — if REST controllers, GraphQL resolvers, API routes exist
     - E2E — if UI pages, frontend routes, user-facing flows exist
 
-    If no code exists (empty project), generate only base artifacts and suggest /qa:configure when code is added.
+    If no code exists (empty project), generate only base artifacts and suggest /qa:sync when code is added.
 
     Base artifacts (always generated):
     - .claude/skills/qa-use-case-identifier/SKILL.md — Identifies testable user flows (NOT invoked during init)
     - .claude/skills/qa-scenario-writer/SKILL.md — Generates Gherkin scenarios
     - .claude/skills/qa-coverage-analyzer/SKILL.md — Analyzes test coverage
     - .claude/skills/qa-test-reviewer/SKILL.md — Reviews test quality
-    - .claude/agents/qa-test-runner/AGENT.md — Runs tests across all enabled types
-    - .claude/agents/qa-coverage-checker/AGENT.md — Runs coverage analysis
-    - .claude/agents/qa-test-reviewer/AGENT.md — Reviews test quality
-    - .claude/commands/test/COMMAND.md — Smart test runner with --integration, --e2e, --api, --all flags
-    - .claude/commands/test-coverage/COMMAND.md — Coverage analysis
-    - .claude/commands/test-review/COMMAND.md — Test quality review
+    - .claude/agents/qa-test-runner.md — Runs tests across all enabled types
+    - .claude/agents/qa-coverage-checker.md — Runs coverage analysis
+    - .claude/agents/qa-test-reviewer.md — Reviews test quality
+    - .claude/commands/test.md — Smart test runner with --integration, --e2e, --api, --all flags
+    - .claude/commands/test/coverage.md — Coverage analysis
+    - .claude/commands/test/review.md — Test quality review
     - .claude/qa-config.json — Stack + testTypes + preferences
 
     Per-type artifacts (only for selected types):
@@ -82,7 +82,7 @@ tests:
       testAnalysisJson: '{"hasTests":false,"testFileCount":0,"sourceFileCount":0,"patterns":[]}'
     assert:
       - type: llm-rubric
-        value: "The response generates only base artifacts (no per-type test-writer skills) and suggests using /qa:configure when code is added"
+        value: "The response generates only base artifacts (no per-type test-writer skills) and suggests using /qa:sync when code is added"
 
   - description: "Rust + Cargo (no existing tests)"
     vars:
